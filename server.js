@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -35,94 +36,28 @@ app.use(
 
 app.use(express.json());
 
+// ⭐ Mount all form routes here
+app.use("/api/webform", formRoutes);
 // =========================================================
 // ⭐ 3. Connect MongoDB
 // =========================================================
-mongoose.connect("mongodb://localhost:27017/webform")
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch(err => console.error("❌ MongoDB error:", err));
+const mongoURI = process.env.MONGO_URI;
 
-app.use("/api/webform", formRoutes); // all routes prefixed with /api/webform
+console.log("mongoURI is "+mongoURI)
 
-
-// =========================================================
-// ⭐ 4. Your API routes
-// =========================================================
-// app.get("/api/webform/getForm", async (req, res) => {
-//   try {
-//     const formId = req.query.form_id;
-
-//     if (!formId) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Missing form_id",
-//       });
-//     }
-
-//     const config = await FormConfig.findOne({ form_id: formId });
-
-//     if (!config) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Form not found",
-//       });
-//     }
-
-//     res.json(config);
-//   } catch (error) {
-//     console.error("API Error:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Server error",
-//     });
-//   }
-// });
-
-// app.post("/api/webform/submit",upload.any(), async(req, res)=>{
-//   try{
-//     const formId= req.body.form_id;
-//     if(!formId)
-//     {
-//       return res.status(400).json({
-//         success:false,
-//         message: "Missing form_id",
-//       })
-//     }
-
-//         // Log submitted values (for testing)
-//     console.log("📩 New Form Submission");
-//     console.log("Form ID:", formId);
-//     console.log("Fields:", req.body);
-//     console.log("Files:", req.files);
-
-//     // Save to MongoDB 
-
-//     const submission = new FormSubmission({
-//       form_id:formId,
-//       fields:req.body,
-//       files:req.files,
-//       submitted_at:new Date(),
-//     })
-
-//     await submission.save();
-//     res.json({
-//       success:true,
-//       message:"Form submitted successfully",
-//     })
-//   }
-//   catch(error){
-//     console.error("submit api error",error);
-
-//     res.status(500).json({
-//       success: false,
-//       message:"Internal server error",
-//     })
-//   }
-// })
+mongoose
+  .connect(mongoURI)
+  .then(() => console.log("✅ Connected to MongoDB Atlas"))
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+  });
 
 // =========================================================
 // ⭐ 5. Start server
 // =========================================================
-app.listen(5000, () => {
-  console.log("Server running on http://localhost:5000");
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
