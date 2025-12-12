@@ -17,7 +17,7 @@ const upload = multer(); // stores data in memory
 // ⭐ 1. FIRST — Add manual CORS override (fixes all errors)
 // =========================================================a
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:3001");
+  res.header("Access-Control-Allow-Origin", "https://formwebtrix001.netlify.app/");
   res.header("Access-Control-Allow-Credentials", "true");
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
   res.header("Access-Control-Allow-Headers", "Content-Type");
@@ -29,7 +29,7 @@ app.use((req, res, next) => {
 // =========================================================
 app.use(
   cors({
-    origin: "http://localhost:3001",
+    origin: "https://formwebtrix001.netlify.app/",
     credentials: true,
   })
 );
@@ -58,6 +58,6 @@ mongoose
 // =========================================================
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
