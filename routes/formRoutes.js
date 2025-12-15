@@ -77,4 +77,24 @@ router.post('/submit', upload.any(), async (req, res) => {
   }
 });
 
+router.put("/:formId/settings", async (req, res) => {
+  try {
+    const { formId } = req.params;
+    const settings = req.body.settings;
+
+    const updated = await FormConfig.findOneAndUpdate(
+      { form_id: formId },
+      { $set: { settings } },
+      { new: true }
+    );
+
+    res.json({ success: true, settings: updated.settings });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
+
+
 module.exports = router;
