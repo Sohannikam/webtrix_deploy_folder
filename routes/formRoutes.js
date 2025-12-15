@@ -78,22 +78,34 @@ router.post('/submit', upload.any(), async (req, res) => {
 });
 
 router.put("/:formId/settings", async (req, res) => {
+  console.log("insdie api setting")
   try {
+    console.log("inside of try block of setting ")
     const { formId } = req.params;
-    const settings = req.body.settings;
+    const { settings } = req.body;
+
+    console.log("form id is"+formId)
 
     const updated = await FormConfig.findOneAndUpdate(
-      { form_id: formId },
-      { $set: { settings } },
+      { formId },
+      { $set: { "definition.settings": settings } },
       { new: true }
     );
 
-    res.json({ success: true, settings: updated.settings });
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Form not found" });
+    }
+
+    res.json({
+      success: true,
+      settings: updated.definition.settings
+    });
   } catch (err) {
-    console.error(err);
+    console.error("Settings update error:", err);
     res.status(500).json({ success: false });
   }
 });
+
 
 
 
