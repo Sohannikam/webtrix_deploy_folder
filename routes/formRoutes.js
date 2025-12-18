@@ -92,7 +92,9 @@ console.log("Received patch:", JSON.stringify(patch, null, 2));
     const setObj = {};
 
     for(const key in patch){
-      setObj[`definition.settings.${key}`]
+for (const key in patch) {
+  setObj[`definition.settings.${key}`] = patch[key];
+}
     }
     const updated = await FormConfig.findOneAndUpdate(
       { formId },
