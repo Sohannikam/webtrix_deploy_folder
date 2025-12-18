@@ -84,6 +84,9 @@ router.put("/:formId/settings", async (req, res) => {
     const { formId } = req.params;
     const { patch } = req.body;
 
+console.log("Received patch:", JSON.stringify(patch, null, 2));
+
+
     console.log("form id is"+formId)
 
     const setObj = {};
