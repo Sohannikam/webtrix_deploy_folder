@@ -32,7 +32,7 @@ const upload = multer(); // stores data in memory
 app.use(
   cors({
     origin: [
-      "*",
+      "https://formwebtrix001.netlify.app",
       // future customer sites can be added here
     ],
     credentials: true,
