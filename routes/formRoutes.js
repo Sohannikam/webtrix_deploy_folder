@@ -82,13 +82,18 @@ router.put("/:formId/settings", async (req, res) => {
   try {
     console.log("inside of try block of setting ")
     const { formId } = req.params;
-    const { settings } = req.body;
+    const { patch } = req.body;
 
     console.log("form id is"+formId)
 
+    const setObj = {};
+
+    for(const key in patch){
+      setObj[`definition.settings.${key}`]
+    }
     const updated = await FormConfig.findOneAndUpdate(
       { formId },
-      { $set: { "definition.settings": settings } },
+      { $set: setObj},
       { new: true }
     );
 
