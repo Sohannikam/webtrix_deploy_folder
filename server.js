@@ -16,13 +16,13 @@ const upload = multer(); // stores data in memory
 // =========================================================
 // ⭐ 1. FIRST — Add manual CORS override (fixes all errors)
 // =========================================================
-// app.use((req, res, next) => {
-//   res.header("Access-Control-Allow-Origin", "https://formwebtrix001.netlify.app");
-//   res.header("Access-Control-Allow-Credentials", "true");
-//   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
-//   res.header("Access-Control-Allow-Headers", "Content-Type");
-//   next();
-// });
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://formwebtrix001.netlify.app");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  next();
+});
 
 
 
@@ -31,13 +31,8 @@ const upload = multer(); // stores data in memory
 // =========================================================
 app.use(
   cors({
-    origin: [
-      "https://formwebtrix001.netlify.app",
-      // future customer sites can be added here
-    ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type"],
+   origin: "https://formwebtrix001.netlify.app",
+   credentials: true,
   })
 );
 
