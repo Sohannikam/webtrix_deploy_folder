@@ -9,8 +9,10 @@ const upload = multer(); // stores files in memory
 
 
 async function verifyRecaptcha(token, ip) {
+
   if (!token) return null;
 
+  console.log("inside of verifyRecaptcha")
   const secret = process.env.RECAPTCHA_SECRET_KEY;
 
   const response = await fetch(
@@ -44,7 +46,7 @@ router.post('/submit', upload.any(), async (req, res) => {
     }
 
     /* ===============================
-       🔐 reCAPTCHA VERIFICATION
+    reCAPTCHA VERIFICATION
     =============================== */
 
     const recaptchaToken = req.body["g-recaptcha-response"];
@@ -60,6 +62,8 @@ router.post('/submit', upload.any(), async (req, res) => {
       recaptchaToken,
       req.ip
     );
+
+    console.log("recaptcha value after verifyRecaptcha is"+JSON.stringify(recaptchaResult, null, 2));
 
     if (!recaptchaResult || !recaptchaResult.success) {
       return res.status(403).json({

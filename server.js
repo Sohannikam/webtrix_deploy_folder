@@ -10,7 +10,7 @@ const formRoutes = require("./routes/formRoutes");
  
 const app = express();
  
-/* =========================================================
+/* ======================================================
 
    ✅ CORS CONFIG (EMBED-FRIENDLY)
 
