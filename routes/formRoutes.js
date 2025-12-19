@@ -6,10 +6,6 @@ const FormConfig = require('../models/FormConfig');
 const FormSubmission = require('../models/FormSubmission');
 const multer = require('multer');
 const upload = multer(); // stores files in memory
-const fetch = require("node-fetch");
-
-
-
 
 
 async function verifyRecaptcha(token, ip) {
