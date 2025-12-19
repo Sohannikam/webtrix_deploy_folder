@@ -1,9 +1,124 @@
+require("dotenv").config();
+
 const express = require('express');
 const router = express.Router();
 const FormConfig = require('../models/FormConfig');
 const FormSubmission = require('../models/FormSubmission');
 const multer = require('multer');
 const upload = multer(); // stores files in memory
+const fetch = require("node-fetch");
+
+
+
+
+
+async function verifyRecaptcha(token, ip) {
+  if (!token) return null;
+
+  const secret = process.env.RECAPTCHA_SECRET_KEY;
+
+  const response = await fetch(
+    "https://www.google.com/recaptcha/api/siteverify",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        secret: secret,
+        response: token,
+        remoteip: ip, // optional but recommended
+      }),
+    }
+  );
+
+  return response.json();
+}
+
+
+
+router.post('/submit', upload.any(), async (req, res) => {
+  try {
+    const formId = req.body.form_id;
+    if (!formId) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing form_id",
+      });
+    }
+
+    /* ===============================
+       🔐 reCAPTCHA VERIFICATION
+    =============================== */
+
+    const recaptchaToken = req.body["g-recaptcha-response"];
+
+    if (!recaptchaToken) {
+      return res.status(403).json({
+        success: false,
+        message: "Security check failed (missing reCAPTCHA token)",
+      });
+    }
+
+    const recaptchaResult = await verifyRecaptcha(
+      recaptchaToken,
+      req.ip
+    );
+
+    if (!recaptchaResult || !recaptchaResult.success) {
+      return res.status(403).json({
+        success: false,
+        message: "reCAPTCHA verification failed",
+      });
+    }
+
+    // OPTIONAL BUT STRONGLY RECOMMENDED
+    const MIN_SCORE = 0.5;
+
+    if (recaptchaResult.score < MIN_SCORE) {
+      return res.status(403).json({
+        success: false,
+        message: "Bot activity detected",
+      });
+    }
+
+    // Optional action check (extra security)
+    if (recaptchaResult.action !== "submit") {
+      return res.status(403).json({
+        success: false,
+        message: "Invalid reCAPTCHA action",
+      });
+    }
+
+    /* ===============================
+       ✅ Passed reCAPTCHA → Save form
+    =============================== */
+
+    const submission = new FormSubmission({
+      form_id: formId,
+      fields: req.body,
+      files: req.files,
+      submitted_at: new Date(),
+
+      // Optional: store score for analytics
+      recaptcha_score: recaptchaResult.score,
+    });
+
+    await submission.save();
+
+    res.json({
+      success: true,
+      message: "Form submitted successfully",
+    });
+  } catch (error) {
+    console.error("submit api error", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
 
 // Save form definition
 router.post('/saveDefinition', async (req, res) => {
@@ -54,28 +169,30 @@ router.get('/form/:formId', async (req, res) => {
 });
 
 // // Submit form
-router.post('/submit', upload.any(), async (req, res) => {
-  try {
-    const formId = req.body.form_id;
-    if (!formId) {
-      return res.status(400).json({ success: false, message: "Missing form_id" });
-    }
+// router.post('/submit', upload.any(), async (req, res) => {
+//   try {
+//     const formId = req.body.form_id;
+//     if (!formId) {
+//       return res.status(400).json({ success: false, message: "Missing form_id" });
+//     }
 
-    const submission = new FormSubmission({
-      form_id: formId,
-      fields: req.body,
-      files: req.files,
-      submitted_at: new Date(),
-    });
 
-    await submission.save();
+//     const submission = new FormSubmission({
+//       form_id: formId,
+//       fields: req.body,
+//       files: req.files,
+//       submitted_at: new Date(),
+//     });
 
-    res.json({ success: true, message: "Form submitted successfully" });
-  } catch (error) {
-    console.error("submit api error", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-});
+//     await submission.save();
+
+//     res.json({ success: true, message: "Form submitted successfully" });
+//   } catch (error) {
+//     console.error("submit api error", error);
+//     res.status(500).json({ success: false, message: "Internal server error" });
+//   }
+// });
+
 
 router.put("/:formId/settings", async (req, res) => {
   console.log("insdie api setting")
