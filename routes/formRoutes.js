@@ -39,6 +39,8 @@ async function verifyTurnstile(token, ip) {
 
   const secret = process.env.TURNSTILE_SECRET_KEY;
 
+  console.log("secret value is"+secret)
+
   const response = await fetch(
     "https://challenges.cloudflare.com/turnstile/v0/siteverify",
     {
@@ -114,7 +116,7 @@ router.post('/submit', upload.any(), async (req, res) => {
     // }
 
     const turnstileToken = req.body["cf-turnstile-response"];
-
+console.log("value of turnstileToken is"+turnstileToken)
 if (!turnstileToken) {
   return res.status(403).json({
     success: false,
