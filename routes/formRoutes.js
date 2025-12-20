@@ -60,106 +60,106 @@ async function verifyRecaptcha(token, ip) {
 // }
 
 
-router.post('/submit', upload.any(), async (req, res) => {
-  try {
-    const formId = req.body.form_id;
-    if (!formId) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing form_id",
-      });
-    }
+// router.post('/submit', upload.any(), async (req, res) => {
+//   try {
+//     const formId = req.body.form_id;
+//     if (!formId) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Missing form_id",
+//       });
+//     }
 
-    /* ===============================
-    reCAPTCHA VERIFICATION
-    =============================== */
+//     /* ===============================
+//     reCAPTCHA VERIFICATION
+//     =============================== */
 
-    const recaptchaToken = req.body["g-recaptcha-response"];
+//     const recaptchaToken = req.body["g-recaptcha-response"];
 
-    if (!recaptchaToken) {
-      return res.status(403).json({
-        success: false,
-        message: "Security check failed (missing reCAPTCHA token)",
-      });
-    }
+//     if (!recaptchaToken) {
+//       return res.status(403).json({
+//         success: false,
+//         message: "Security check failed (missing reCAPTCHA token)",
+//       });
+//     }
 
-    const recaptchaResult = await verifyRecaptcha(
-      recaptchaToken,
-      req.ip
-    );
+//     const recaptchaResult = await verifyRecaptcha(
+//       recaptchaToken,
+//       req.ip
+//     );
 
-    console.log("recaptcha value after verifyRecaptcha is"+JSON.stringify(recaptchaResult, null, 2));
+//     console.log("recaptcha value after verifyRecaptcha is"+JSON.stringify(recaptchaResult, null, 2));
 
-    if (!recaptchaResult || !recaptchaResult.success) {
-      return res.status(403).json({
-        success: false,
-        message: "reCAPTCHA verification failed",
-      });
-    }
+//     if (!recaptchaResult || !recaptchaResult.success) {
+//       return res.status(403).json({
+//         success: false,
+//         message: "reCAPTCHA verification failed",
+//       });
+//     }
 
-    // OPTIONAL BUT STRONGLY RECOMMENDED
-    const MIN_SCORE = 0.5;
+//     // OPTIONAL BUT STRONGLY RECOMMENDED
+//     const MIN_SCORE = 0.5;
 
-    if (recaptchaResult.score < MIN_SCORE) {
-      return res.status(403).json({
-        success: false,
-        message: "Bot activity detected",
-      });
-    }
+//     if (recaptchaResult.score < MIN_SCORE) {
+//       return res.status(403).json({
+//         success: false,
+//         message: "Bot activity detected",
+//       });
+//     }
 
-    // Optional action check (extra security)
-    if (recaptchaResult.action !== "submit") {
-      return res.status(403).json({
-        success: false,
-        message: "Invalid reCAPTCHA action",
-      });
-    }
+//     // Optional action check (extra security)
+//     if (recaptchaResult.action !== "submit") {
+//       return res.status(403).json({
+//         success: false,
+//         message: "Invalid reCAPTCHA action",
+//       });
+//     }
 
-//     const turnstileToken = req.body["cf-turnstile-response"];
-// console.log("value of turnstileToken is"+turnstileToken)
-// if (!turnstileToken) {
-//   return res.status(403).json({
-//     success: false,
-//     message: "Security check failed",
-//   });
-// }
+// //     const turnstileToken = req.body["cf-turnstile-response"];
+// // console.log("value of turnstileToken is"+turnstileToken)
+// // if (!turnstileToken) {
+// //   return res.status(403).json({
+// //     success: false,
+// //     message: "Security check failed",
+// //   });
+// // }
 
-// const result = await verifyTurnstile(turnstileToken, req.ip);
+// // const result = await verifyTurnstile(turnstileToken, req.ip);
 
-// if (!result || result.success !== true) {
-//   return res.status(403).json({
-//     success: false,
-//     message: "Bot verification failed",
-//   });
-// }
+// // if (!result || result.success !== true) {
+// //   return res.status(403).json({
+// //     success: false,
+// //     message: "Bot verification failed",
+// //   });
+// // }
 
 
-    /* ===============================
-       ✅ Passed reCAPTCHA → Save form
-    =============================== */
+//     /* ===============================
+//        ✅ Passed reCAPTCHA → Save form
+//     =============================== */
 
-    const submission = new FormSubmission({
-      form_id: formId,
-      fields: req.body,
-      files: req.files,
-      submitted_at: new Date(),
+//     const submission = new FormSubmission({
+//       form_id: formId,
+//       fields: req.body,
+//       files: req.files,
+//       submitted_at: new Date(),
 
-    });
+//     });
 
-    await submission.save();
+//     await submission.save();
 
-    res.json({
-      success: true,
-      message: "Form submitted successfully",
-    });
-  } catch (error) {
-    console.error("submit api error", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-});
+//     res.json({
+//       success: true,
+//       message: "Form submitted successfully",
+//     });
+//   } catch (error) {
+//     console.error("submit api error", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Internal server error",
+//     });
+//   }
+// });
 
 
 // Save form definition
@@ -211,29 +211,29 @@ router.get('/form/:formId', async (req, res) => {
 });
 
 // // Submit form
-// router.post('/submit', upload.any(), async (req, res) => {
-//   try {
-//     const formId = req.body.form_id;
-//     if (!formId) {
-//       return res.status(400).json({ success: false, message: "Missing form_id" });
-//     }
+router.post('/submit', upload.any(), async (req, res) => {
+  try {
+    const formId = req.body.form_id;
+    if (!formId) {
+      return res.status(400).json({ success: false, message: "Missing form_id" });
+    }
 
 
-//     const submission = new FormSubmission({
-//       form_id: formId,
-//       fields: req.body,
-//       files: req.files,
-//       submitted_at: new Date(),
-//     });
+    const submission = new FormSubmission({
+      form_id: formId,
+      fields: req.body,
+      files: req.files,
+      submitted_at: new Date(),
+    });
 
-//     await submission.save();
+    await submission.save();
 
-//     res.json({ success: true, message: "Form submitted successfully" });
-//   } catch (error) {
-//     console.error("submit api error", error);
-//     res.status(500).json({ success: false, message: "Internal server error" });
-//   }
-// });
+    res.json({ success: true, message: "Form submitted successfully" });
+  } catch (error) {
+    console.error("submit api error", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
 
 
 router.put("/:formId/settings", async (req, res) => {
