@@ -9,7 +9,7 @@ const upload = multer(); // stores files in memory
 
 
 async function verifyRecaptcha(token, ip) {
-
+ console.log("value of token in formRoutes.js is"+token);
   if (!token) return null;
 
   console.log("inside of verifyRecaptcha")
