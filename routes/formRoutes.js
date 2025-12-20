@@ -8,56 +8,56 @@ const multer = require('multer');
 const upload = multer(); // stores files in memory
 
 
-// async function verifyRecaptcha(token, ip) {
+async function verifyRecaptcha(token, ip) {
 
-//   if (!token) return null;
-
-//   console.log("inside of verifyRecaptcha")
-//   const secret = process.env.RECAPTCHA_SECRET_KEY;
-//   console.log("secret key is"+secret)
-
-//   const response = await fetch(
-//     "https://www.google.com/recaptcha/api/siteverify",
-//     {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/x-www-form-urlencoded",
-//       },
-//       body: new URLSearchParams({
-//         secret: secret,
-//         response: token,
-//         remoteip: ip, // optional but recommended
-//       }),
-//     }
-//   );
-
-//   return response.json();
-// }
-
-async function verifyTurnstile(token, ip) {
   if (!token) return null;
 
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-
-  console.log("secret value is"+secret)
+  console.log("inside of verifyRecaptcha")
+  const secret = process.env.RECAPTCHA_SECRET_KEY;
+  console.log("secret key is"+secret)
 
   const response = await fetch(
-    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    "https://www.google.com/recaptcha/api/siteverify",
     {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
-        secret,
+        secret: secret,
         response: token,
-        remoteip: ip,
+        remoteip: ip, // optional but recommended
       }),
     }
   );
 
   return response.json();
 }
+
+// async function verifyTurnstile(token, ip) {
+//   if (!token) return null;
+
+//   const secret = process.env.TURNSTILE_SECRET_KEY;
+
+//   console.log("secret value is"+secret)
+
+//   const response = await fetch(
+//     "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+//     {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/x-www-form-urlencoded",
+//       },
+//       body: new URLSearchParams({
+//         secret,
+//         response: token,
+//         remoteip: ip,
+//       }),
+//     }
+//   );
+
+//   return response.json();
+// }
 
 
 router.post('/submit', upload.any(), async (req, res) => {
@@ -74,64 +74,64 @@ router.post('/submit', upload.any(), async (req, res) => {
     reCAPTCHA VERIFICATION
     =============================== */
 
-    // const recaptchaToken = req.body["g-recaptcha-response"];
+    const recaptchaToken = req.body["g-recaptcha-response"];
 
-    // if (!recaptchaToken) {
-    //   return res.status(403).json({
-    //     success: false,
-    //     message: "Security check failed (missing reCAPTCHA token)",
-    //   });
-    // }
+    if (!recaptchaToken) {
+      return res.status(403).json({
+        success: false,
+        message: "Security check failed (missing reCAPTCHA token)",
+      });
+    }
 
-    // const recaptchaResult = await verifyRecaptcha(
-    //   recaptchaToken,
-    //   req.ip
-    // );
+    const recaptchaResult = await verifyRecaptcha(
+      recaptchaToken,
+      req.ip
+    );
 
-    // console.log("recaptcha value after verifyRecaptcha is"+JSON.stringify(recaptchaResult, null, 2));
+    console.log("recaptcha value after verifyRecaptcha is"+JSON.stringify(recaptchaResult, null, 2));
 
-    // if (!recaptchaResult || !recaptchaResult.success) {
-    //   return res.status(403).json({
-    //     success: false,
-    //     message: "reCAPTCHA verification failed",
-    //   });
-    // }
+    if (!recaptchaResult || !recaptchaResult.success) {
+      return res.status(403).json({
+        success: false,
+        message: "reCAPTCHA verification failed",
+      });
+    }
 
-    // // OPTIONAL BUT STRONGLY RECOMMENDED
-    // const MIN_SCORE = 0.5;
+    // OPTIONAL BUT STRONGLY RECOMMENDED
+    const MIN_SCORE = 0.5;
 
-    // if (recaptchaResult.score < MIN_SCORE) {
-    //   return res.status(403).json({
-    //     success: false,
-    //     message: "Bot activity detected",
-    //   });
-    // }
+    if (recaptchaResult.score < MIN_SCORE) {
+      return res.status(403).json({
+        success: false,
+        message: "Bot activity detected",
+      });
+    }
 
-    // // Optional action check (extra security)
-    // if (recaptchaResult.action !== "submit") {
-    //   return res.status(403).json({
-    //     success: false,
-    //     message: "Invalid reCAPTCHA action",
-    //   });
-    // }
+    // Optional action check (extra security)
+    if (recaptchaResult.action !== "submit") {
+      return res.status(403).json({
+        success: false,
+        message: "Invalid reCAPTCHA action",
+      });
+    }
 
-    const turnstileToken = req.body["cf-turnstile-response"];
-console.log("value of turnstileToken is"+turnstileToken)
-if (!turnstileToken) {
-  return res.status(403).json({
-    success: false,
-    message: "Security check failed",
-  });
-}
+//     const turnstileToken = req.body["cf-turnstile-response"];
+// console.log("value of turnstileToken is"+turnstileToken)
+// if (!turnstileToken) {
+//   return res.status(403).json({
+//     success: false,
+//     message: "Security check failed",
+//   });
+// }
 
-const result = await verifyTurnstile(turnstileToken, req.ip);
+// const result = await verifyTurnstile(turnstileToken, req.ip);
 
-if (!result || result.success !== true) {
-  return res.status(403).json({
-    success: false,
-    message: "Bot verification failed",
-  });
-}
+// if (!result || result.success !== true) {
+//   return res.status(403).json({
+//     success: false,
+//     message: "Bot verification failed",
+//   });
+// }
 
 
     /* ===============================
