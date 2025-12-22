@@ -212,12 +212,13 @@ router.get('/form/:formId', async (req, res) => {
 
 // // Submit form
 router.post('/submit', upload.any(), async (req, res) => {
+
+  console.log("inside older submit fucntion of Formroutes.js")
   try {
     const formId = req.body.form_id;
     if (!formId) {
       return res.status(400).json({ success: false, message: "Missing form_id" });
     }
-
 
     const submission = new FormSubmission({
       form_id: formId,
