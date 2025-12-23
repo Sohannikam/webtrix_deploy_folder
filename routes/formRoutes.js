@@ -213,8 +213,24 @@ router.get('/form/:formId', async (req, res) => {
 // // Submit form
 router.post('/submit', upload.any(), async (req, res) => {
 
+
+
   console.log("inside older submit fucntion of Formroutes.js")
   try {
+
+       // 🐝 Honeypot check
+    if (req.body.company_website) {
+      console.warn("Honeypot triggered", {
+        ip: req.ip,
+        value: req.body.company_website,
+      });
+
+      return res.status(400).json({
+        success: false,
+        message: "Spam detected",
+      });
+    }
+    
     const formId = req.body.form_id;
     if (!formId) {
       return res.status(400).json({ success: false, message: "Missing form_id" });
