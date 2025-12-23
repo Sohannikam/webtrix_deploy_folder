@@ -213,9 +213,6 @@ router.get('/form/:formId', async (req, res) => {
 // // Submit form
 router.post('/submit', upload.any(), async (req, res) => {
 
-
-
-  console.log("inside older submit fucntion of Formroutes.js")
   try {
 
        // 🐝 Honeypot check
@@ -230,7 +227,19 @@ router.post('/submit', upload.any(), async (req, res) => {
         message: "Spam detected",
       });
     }
-    
+
+    const renderTime = Number(req.body._form_render_time);
+
+if (!renderTime || renderTime < 2000) {
+  // bot detected
+
+     return res.status(400).json({
+        success: false,
+        message: "Suspicious submission detected",
+      });
+}
+
+
     const formId = req.body.form_id;
     if (!formId) {
       return res.status(400).json({ success: false, message: "Missing form_id" });
