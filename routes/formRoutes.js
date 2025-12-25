@@ -302,6 +302,27 @@ for (const key in patch) {
 });
 
 
+// ✅ Get last saved form (latest updated)
+router.get("/forms/last", async (req, res) => {
+  try {
+    const lastForm = await FormConfig
+      .findOne({})
+      .sort({ updatedAt: -1 }) // 🔥 MOST IMPORTANT LINE
+      .select("formId updatedAt createdAt");
+
+    if (!lastForm) {
+      return res.status(404).json({ message: "No forms found" });
+    }
+
+    res.json({
+      formId: lastForm.formId,
+      updatedAt: lastForm.updatedAt,
+    });
+  } catch (err) {
+    console.error("Get last form error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 
 module.exports = router;
